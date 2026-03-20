@@ -6,7 +6,6 @@ import { CalendarView } from "./components/CalendarView";
 import { GuestForm } from "./components/GuestForm";
 import { ReservationConfirmation } from "./components/ReservationConfirmation";
 import { ReservationsList } from "./components/ReservationsList";
-import { ReservationsCalendar } from "./components/ReservationsCalendar";
 import { Dashboard } from "./components/Dashboard";
 import { ExpensesManager } from "./components/ExpensesManager";
 import { BalanceView } from "./components/BalanceView";
@@ -624,13 +623,6 @@ export default function App() {
                   />
                 </div>
 
-                {/* Calendario mensual */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-                  <ReservationsCalendar
-                    reservations={reservations}
-                    cabins={cabinList}
-                  />
-                </div>
               </div>
             </TabsContent>
 
