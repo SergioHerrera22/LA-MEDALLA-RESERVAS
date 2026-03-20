@@ -36,6 +36,21 @@ type ExpenseRow = {
   cabin_id: string | null;
 };
 
+const initialCabinImageById = new Map(
+  initialCabins.map((cabin) => [cabin.id, cabin.image]),
+);
+
+const normalizeCabinKey = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+
+const initialCabinImageByName = new Map(
+  initialCabins.map((cabin) => [normalizeCabinKey(cabin.name), cabin.image]),
+);
+
 const mapCabinRow = (row: CabinRow): Cabin => ({
   id: row.id,
   name: row.name,
@@ -43,7 +58,10 @@ const mapCabinRow = (row: CabinRow): Cabin => ({
   capacity: row.capacity,
   pricePerNight: Number(row.price_per_night),
   amenities: row.amenities ?? [],
-  image: row.image,
+  image:
+    initialCabinImageById.get(row.id) ??
+    initialCabinImageByName.get(normalizeCabinKey(row.name)) ??
+    row.image,
 });
 
 const mapCabinToRow = (cabin: Cabin): CabinRow => ({
