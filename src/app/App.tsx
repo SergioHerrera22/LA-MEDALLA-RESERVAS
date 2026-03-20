@@ -297,16 +297,33 @@ export default function App() {
       {/* Header */}
       <header className="bg-gradient-to-r from-green-700 to-emerald-600 text-white shadow-lg">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-2 rounded-lg">
-              <Home className="w-8 h-8 text-green-700" />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-2 rounded-lg">
+                <Home className="w-8 h-8 text-green-700" />
+              </div>
+              <div>
+                <h1 className="text-2xl">Cabañas la Medalla</h1>
+                <p className="text-green-100 text-sm">
+                  Sistema de Gestión y Reservas
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl">Cabañas la Medalla</h1>
-              <p className="text-green-100 text-sm">
-                Sistema de Gestión y Reservas
-              </p>
-            </div>
+            <Button
+              variant="secondary"
+              className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30"
+              onClick={() => {
+                setActiveTab("reservations");
+                setTimeout(() => {
+                  document
+                    .getElementById("reservations-list")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 100);
+              }}
+            >
+              <CalendarIcon className="w-4 h-4" />
+              Ver Reservas
+            </Button>
           </div>
         </div>
       </header>
@@ -509,8 +526,7 @@ export default function App() {
                       <Button
                         onClick={() => {
                           setActiveTab("reservations");
-                          // Show reservations list
-                          setCurrentStep(5);
+                          setCurrentStep(1);
                         }}
                         variant="outline"
                       >
@@ -521,32 +537,33 @@ export default function App() {
                 )}
 
                 {/* Reservations List */}
-                {currentStep === 5 && (
-                  <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <h2 className="text-2xl mb-2">Reservas Registradas</h2>
-                        <p className="text-gray-600">
-                          Gestione todas las reservas de las cabañas
-                        </p>
-                      </div>
-                      <Button
-                        onClick={handleNewReservation}
-                        className="bg-green-600 hover:bg-green-700 gap-2"
-                      >
-                        <CalendarIcon className="w-4 h-4" />
-                        Nueva Reserva
-                      </Button>
+                <div
+                  id="reservations-list"
+                  className="bg-white rounded-lg shadow-sm p-6 mt-6"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-2xl mb-2">Reservas Registradas</h2>
+                      <p className="text-gray-600">
+                        Gestione todas las reservas de las cabañas
+                      </p>
                     </div>
-
-                    <ReservationsList
-                      reservations={reservations}
-                      cabins={cabinList}
-                      onUpdate={handleUpdateReservation}
-                      onDelete={handleDeleteReservation}
-                    />
+                    <Button
+                      onClick={handleNewReservation}
+                      className="bg-green-600 hover:bg-green-700 gap-2"
+                    >
+                      <CalendarIcon className="w-4 h-4" />
+                      Nueva Reserva
+                    </Button>
                   </div>
-                )}
+
+                  <ReservationsList
+                    reservations={reservations}
+                    cabins={cabinList}
+                    onUpdate={handleUpdateReservation}
+                    onDelete={handleDeleteReservation}
+                  />
+                </div>
               </div>
             </TabsContent>
 
@@ -581,7 +598,8 @@ export default function App() {
       <footer className="bg-gray-800 text-white mt-16">
         <div className="container mx-auto px-4 py-6 text-center">
           <p className="text-sm text-gray-400">
-            © 2026 Cabañas del Valle - Sistema de Gestión Integral
+            © 2026 Cabañas La Medalla - Desarrollado por Santiago Herrera. Todos
+            los derechos reservados.
           </p>
         </div>
       </footer>
