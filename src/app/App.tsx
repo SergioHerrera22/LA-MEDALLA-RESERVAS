@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Button } from "./components/ui/button";
-import { Progress } from "./components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { CabinSelector } from "./components/CabinSelector";
 import { CalendarView } from "./components/CalendarView";
 import { GuestForm } from "./components/GuestForm";
 import { ReservationConfirmation } from "./components/ReservationConfirmation";
 import { ReservationsList } from "./components/ReservationsList";
+import { ReservationsCalendar } from "./components/ReservationsCalendar";
+import { Dashboard } from "./components/Dashboard";
 import { ExpensesManager } from "./components/ExpensesManager";
 import { BalanceView } from "./components/BalanceView";
 import { cabins as initialCabins } from "./data/cabins";
@@ -28,6 +29,7 @@ import {
   Calendar as CalendarIcon,
   DollarSign,
   TrendingUp,
+  LayoutDashboard,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { DateRange } from "react-day-picker";
@@ -35,8 +37,8 @@ import { differenceInDays } from "date-fns";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<
-    "reservations" | "expenses" | "balance"
-  >("reservations");
+    "dashboard" | "reservations" | "expenses" | "balance"
+  >("dashboard");
   const [currentStep, setCurrentStep] = useState(1);
   const [cabinList, setCabinList] = useState<Cabin[]>(initialCabins);
   const [selectedCabin, setSelectedCabin] = useState<Cabin | null>(null);
@@ -295,23 +297,34 @@ export default function App() {
       <Toaster position="top-center" richColors />
 
       {/* Header */}
-      <header className="bg-gradient-to-r from-green-700 to-emerald-600 text-white shadow-lg">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="bg-white p-2 rounded-lg">
-                <Home className="w-8 h-8 text-green-700" />
+      <header className="relative bg-gradient-to-r from-green-800 via-emerald-700 to-teal-700 text-white shadow-xl overflow-hidden">
+        {/* Subtle decorative background pattern */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="relative container mx-auto px-4 sm:px-6 py-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="bg-white/15 backdrop-blur-sm p-3 rounded-2xl border border-white/20 shadow-inner">
+                <Home className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl">Cabañas la Medalla</h1>
-                <p className="text-green-100 text-sm">
+                <h1 className="text-2xl font-bold tracking-tight text-white">
+                  Cabañas La Medalla
+                </h1>
+                <p className="text-emerald-200 text-sm font-medium tracking-wide">
                   Sistema de Gestión y Reservas
                 </p>
               </div>
             </div>
             <Button
               variant="secondary"
-              className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30"
+              className="gap-2 bg-white/15 hover:bg-white/25 text-white border border-white/25 backdrop-blur-sm rounded-xl font-medium transition-all"
               onClick={() => {
                 setActiveTab("reservations");
                 setTimeout(() => {
@@ -331,13 +344,11 @@ export default function App() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {isLoadingData ? (
-          <div className="mx-auto max-w-2xl rounded-lg bg-white p-8 text-center shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">
-              Cargando datos
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Se está sincronizando la información de cabañas, reservas y gastos
-              con Supabase.
+          <div className="mx-auto max-w-sm rounded-2xl bg-white p-10 text-center shadow-lg border border-gray-100">
+            <div className="mx-auto mb-4 w-12 h-12 rounded-full border-4 border-emerald-200 border-t-emerald-600 animate-spin" />
+            <h2 className="text-lg font-bold text-gray-900">Cargando datos</h2>
+            <p className="mt-1.5 text-sm text-gray-500">
+              Sincronizando cabañas, reservas y gastos…
             </p>
           </div>
         ) : (
@@ -345,69 +356,114 @@ export default function App() {
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as typeof activeTab)}
           >
-            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 mb-8">
-              <TabsTrigger value="reservations" className="gap-2">
+            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 mb-8 bg-white border border-gray-200 shadow-sm rounded-2xl p-1 h-auto">
+              <TabsTrigger
+                value="dashboard"
+                className="gap-2 rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                Inicio
+              </TabsTrigger>
+              <TabsTrigger
+                value="reservations"
+                className="gap-2 rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+              >
                 <CalendarIcon className="w-4 h-4" />
                 Reservas
               </TabsTrigger>
-              <TabsTrigger value="expenses" className="gap-2">
+              <TabsTrigger
+                value="expenses"
+                className="gap-2 rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+              >
                 <DollarSign className="w-4 h-4" />
                 Gastos
               </TabsTrigger>
-              <TabsTrigger value="balance" className="gap-2">
+              <TabsTrigger
+                value="balance"
+                className="gap-2 rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+              >
                 <TrendingUp className="w-4 h-4" />
                 Balance
               </TabsTrigger>
             </TabsList>
 
             {/* Reservations Tab */}
+            {/* Dashboard Tab */}
+            <TabsContent value="dashboard">
+              <div className="max-w-6xl mx-auto">
+                <Dashboard reservations={reservations} cabins={cabinList} />
+              </div>
+            </TabsContent>
+
+            {/* Reservations Tab */}
             <TabsContent value="reservations">
               <div className="max-w-6xl mx-auto">
                 {currentStep < totalSteps ? (
                   <>
-                    {/* Progress Bar */}
-                    <div className="mb-8 bg-white rounded-lg shadow-sm p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-medium text-gray-700">
-                          Paso {currentStep} de {totalSteps - 1}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {Math.round((currentStep / (totalSteps - 1)) * 100)}%
-                          completado
-                        </span>
-                      </div>
-                      <Progress
-                        value={(currentStep / (totalSteps - 1)) * 100}
-                        className="h-2"
-                      />
-
-                      <div className="flex justify-between mt-4 text-xs text-gray-600">
-                        <span
-                          className={
-                            currentStep >= 1 ? "text-green-600 font-medium" : ""
-                          }
-                        >
-                          Cabaña
-                        </span>
-                        <span
-                          className={
-                            currentStep >= 2 ? "text-green-600 font-medium" : ""
-                          }
-                        >
-                          Fechas
-                        </span>
-                        <span
-                          className={
-                            currentStep >= 3 ? "text-green-600 font-medium" : ""
-                          }
-                        >
-                          Datos
-                        </span>
+                    {/* Visual step indicator */}
+                    <div className="mb-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                      <div className="flex items-center justify-between relative">
+                        {/* Connecting line */}
+                        <div className="absolute left-0 right-0 top-5 h-0.5 bg-gray-200 mx-12" />
+                        <div
+                          className="absolute left-0 top-5 h-0.5 bg-emerald-500 mx-12 transition-all duration-500"
+                          style={{
+                            width: `${((currentStep - 1) / (totalSteps - 2)) * 100}%`,
+                            right: "auto",
+                          }}
+                        />
+                        {[
+                          { step: 1, label: "Cabaña" },
+                          { step: 2, label: "Fechas" },
+                          { step: 3, label: "Datos" },
+                        ].map(({ step, label }) => (
+                          <div
+                            key={step}
+                            className="relative z-10 flex flex-col items-center gap-2"
+                          >
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                                currentStep > step
+                                  ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                                  : currentStep === step
+                                    ? "bg-emerald-600 text-white ring-4 ring-emerald-100 shadow-md"
+                                    : "bg-gray-100 text-gray-400 border-2 border-gray-200"
+                              }`}
+                            >
+                              {currentStep > step ? (
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth={2.5}
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                              ) : (
+                                step
+                              )}
+                            </div>
+                            <span
+                              className={`text-xs font-semibold ${
+                                currentStep >= step
+                                  ? "text-emerald-700"
+                                  : "text-gray-400"
+                              }`}
+                            >
+                              {label}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
                     {/* Steps Content */}
-                    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
                       {currentStep === 1 && (
                         <CabinSelector
                           cabins={cabinList}
@@ -441,7 +497,7 @@ export default function App() {
                         <Button
                           variant="outline"
                           onClick={handlePrevious}
-                          className="gap-2"
+                          className="gap-2 rounded-xl border-gray-200 font-semibold hover:bg-gray-50"
                         >
                           <ChevronLeft className="w-4 h-4" />
                           Anterior
@@ -452,7 +508,7 @@ export default function App() {
                         <Button
                           onClick={handleNext}
                           disabled={!canGoNext()}
-                          className="ml-auto gap-2 bg-green-600 hover:bg-green-700"
+                          className="ml-auto gap-2 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-semibold shadow-sm shadow-emerald-200"
                         >
                           Siguiente
                           <ChevronRight className="w-4 h-4" />
@@ -463,7 +519,7 @@ export default function App() {
                         <Button
                           onClick={handleNext}
                           disabled={!canGoNext() || isSavingReservation}
-                          className="ml-auto gap-2 bg-green-600 hover:bg-green-700"
+                          className="ml-auto gap-2 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-semibold shadow-sm shadow-emerald-200"
                         >
                           Confirmar Reserva
                           <ChevronRight className="w-4 h-4" />
@@ -476,13 +532,13 @@ export default function App() {
                       selectedCabin &&
                       selectedRange?.from &&
                       selectedRange?.to && (
-                        <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="mt-6 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl p-5 shadow-sm">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-sm font-semibold text-gray-700">
                                 Precio total estimado
                               </p>
-                              <p className="text-xs text-gray-500 mt-1">
+                              <p className="text-xs text-gray-500 mt-0.5">
                                 {differenceInDays(
                                   selectedRange.to,
                                   selectedRange.from,
@@ -491,7 +547,7 @@ export default function App() {
                                 {selectedCabin.pricePerNight.toLocaleString()}
                               </p>
                             </div>
-                            <p className="text-2xl font-bold text-green-600">
+                            <p className="text-3xl font-extrabold text-emerald-700 tracking-tight">
                               ${totalPrice.toLocaleString()}
                             </p>
                           </div>
@@ -501,7 +557,7 @@ export default function App() {
                 ) : (
                   <>
                     {/* Confirmation View */}
-                    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
                       {selectedCabin &&
                         selectedRange?.from &&
                         selectedRange?.to &&
@@ -519,7 +575,7 @@ export default function App() {
                     <div className="flex justify-center gap-4">
                       <Button
                         onClick={handleNewReservation}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-emerald-600 hover:bg-emerald-700 rounded-xl font-semibold shadow-sm"
                       >
                         Nueva Reserva
                       </Button>
@@ -529,6 +585,7 @@ export default function App() {
                           setCurrentStep(1);
                         }}
                         variant="outline"
+                        className="rounded-xl font-semibold border-gray-200"
                       >
                         Ver Todas las Reservas
                       </Button>
@@ -539,18 +596,20 @@ export default function App() {
                 {/* Reservations List */}
                 <div
                   id="reservations-list"
-                  className="bg-white rounded-lg shadow-sm p-6 mt-6"
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mt-6"
                 >
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-2xl mb-2">Reservas Registradas</h2>
-                      <p className="text-gray-600">
+                      <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+                        Reservas Registradas
+                      </h2>
+                      <p className="text-gray-500 text-sm mt-0.5">
                         Gestione todas las reservas de las cabañas
                       </p>
                     </div>
                     <Button
                       onClick={handleNewReservation}
-                      className="bg-green-600 hover:bg-green-700 gap-2"
+                      className="bg-emerald-600 hover:bg-emerald-700 gap-2 rounded-xl font-semibold shadow-sm"
                     >
                       <CalendarIcon className="w-4 h-4" />
                       Nueva Reserva
@@ -564,12 +623,20 @@ export default function App() {
                     onDelete={handleDeleteReservation}
                   />
                 </div>
+
+                {/* Calendario mensual */}
+                <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+                  <ReservationsCalendar
+                    reservations={reservations}
+                    cabins={cabinList}
+                  />
+                </div>
               </div>
             </TabsContent>
 
             {/* Expenses Tab */}
             <TabsContent value="expenses">
-              <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-sm p-6">
+              <div className="max-w-6xl mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                 <ExpensesManager
                   expenses={expenses}
                   cabins={cabinList}
@@ -595,11 +662,18 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white mt-16">
-        <div className="container mx-auto px-4 py-6 text-center">
-          <p className="text-sm text-gray-400">
-            © 2026 Cabañas La Medalla - Desarrollado por Santiago Herrera. Todos
-            los derechos reservados.
+      <footer className="bg-gradient-to-r from-gray-900 to-gray-800 text-white mt-16 border-t border-gray-700">
+        <div className="container mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="bg-white/10 p-1.5 rounded-lg">
+              <Home className="w-4 h-4 text-emerald-400" />
+            </div>
+            <span className="text-sm font-semibold text-white">
+              Cabañas La Medalla
+            </span>
+          </div>
+          <p className="text-xs text-gray-400">
+            © 2026 · Desarrollado por Santiago Herrera
           </p>
         </div>
       </footer>
