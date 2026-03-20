@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
+import { ReservationsCalendar } from "./ReservationsCalendar";
 import {
   TrendingUp,
   CalendarDays,
@@ -121,283 +122,177 @@ export function Dashboard({ reservations, cabins }: DashboardProps) {
         </div>
       </div>
 
-      {/* Métricas principales */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Ingresos */}
-        <div className="relative bg-white rounded-2xl border border-gray-100 shadow-sm p-6 overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-green-500 rounded-t-2xl" />
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-emerald-50 p-2.5 rounded-xl">
-              <TrendingUp className="w-5 h-5 text-emerald-600" />
-            </div>
-            <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-              Este mes
-            </span>
-          </div>
-          <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
-            ${metrics.monthlyIncome.toLocaleString()}
-          </p>
-          <p className="text-sm text-gray-500 mt-1.5 font-medium">Ingresos del mes</p>
-        </div>
-
-        {/* Reservas */}
-        <div className="relative bg-white rounded-2xl border border-gray-100 shadow-sm p-6 overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-sky-500 rounded-t-2xl" />
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-blue-50 p-2.5 rounded-xl">
-              <CalendarDays className="w-5 h-5 text-blue-600" />
-            </div>
-            <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">
-              Este mes
-            </span>
-          </div>
-          <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
-            {metrics.monthlyReservations.length}
-          </p>
-          <p className="text-sm text-gray-500 mt-1.5 font-medium">Reservas del mes</p>
-        </div>
-
-        {/* Ocupación */}
-        <div className="relative bg-white rounded-2xl border border-gray-100 shadow-sm p-6 overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-400 to-purple-500 rounded-t-2xl" />
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-violet-50 p-2.5 rounded-xl">
-              <Home className="w-5 h-5 text-violet-600" />
-            </div>
-            <span className="text-xs font-medium text-violet-700 bg-violet-50 px-2.5 py-1 rounded-full">
-              Ahora
-            </span>
-          </div>
-          <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
-            {occupancyPercent}%
-          </p>
-          <p className="text-sm text-gray-500 mt-1.5 font-medium">
-            {metrics.occupiedToday.length} de {cabins.length} cabañas ocupadas
-          </p>
-          <div className="mt-3 bg-gray-100 rounded-full h-1.5">
-            <div
-              className="bg-gradient-to-r from-violet-400 to-purple-500 h-1.5 rounded-full transition-all"
-              style={{ width: `${occupancyPercent}%` }}
+      {/* Layout de 2 columnas: Calendario (izq) + Panel de Control (der) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* IZQUIERDA: Calendario */}
+        <div className="lg:col-span-2">
+          <Card className="p-6">
+            <ReservationsCalendar
+              reservations={reservations}
+              cabins={cabins}
             />
-          </div>
+          </Card>
         </div>
 
-        {/* Llegadas */}
-        <div className="relative bg-white rounded-2xl border border-gray-100 shadow-sm p-6 overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-t-2xl" />
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-amber-50 p-2.5 rounded-xl">
-              <Clock className="w-5 h-5 text-amber-600" />
+        {/* DERECHA: Panel de Control comprimido */}
+        <aside className="space-y-4">
+          {/* Métricas principales comprimidas */}
+          {/* Ingresos */}
+          <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm p-4 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-green-500 rounded-t-xl" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-emerald-50 p-2 rounded-lg">
+                <TrendingUp className="w-4 h-4 text-emerald-600" />
+              </div>
+              <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                Mes
+              </span>
             </div>
-            <span className="text-xs font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
-              Próx. 7 días
-            </span>
+            <p className="text-2xl font-extrabold text-gray-900 tracking-tight">
+              ${metrics.monthlyIncome.toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-500 mt-1 font-medium">Ingresos</p>
           </div>
-          <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
-            {metrics.upcomingArrivals.length}
-          </p>
-          <p className="text-sm text-gray-500 mt-1.5 font-medium">Llegadas próximas</p>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Estado cabañas hoy */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
-            <div className="bg-gray-100 p-2 rounded-lg">
-              <Home className="w-4 h-4 text-gray-600" />
+          {/* Reservas */}
+          <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm p-4 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-sky-500 rounded-t-xl" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-blue-50 p-2 rounded-lg">
+                <CalendarDays className="w-4 h-4 text-blue-600" />
+              </div>
+              <span className="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
+                Mes
+              </span>
             </div>
-            <h3 className="font-semibold text-gray-900">Estado de cabañas hoy</h3>
+            <p className="text-2xl font-extrabold text-gray-900 tracking-tight">
+              {metrics.monthlyReservations.length}
+            </p>
+            <p className="text-xs text-gray-500 mt-1 font-medium">Reservas</p>
           </div>
-          <div className="divide-y divide-gray-50">
-            {cabins.map((cabin) => {
-              const reservation = reservations
-                .filter((r) => r.status !== "cancelled")
-                .find(
-                  (r) =>
-                    r.cabin.id === cabin.id &&
-                    isWithinInterval(today, {
-                      start: startOfDay(r.startDate),
-                      end: endOfDay(r.endDate),
-                    }),
-                );
-              return (
-                <div
-                  key={cabin.id}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-gray-50/60 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                        reservation
-                          ? "bg-orange-400 shadow-[0_0_6px_rgba(251,146,60,0.6)]"
-                          : "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]"
-                      }`}
-                    />
-                    <span className="font-medium text-gray-800">{cabin.name}</span>
-                  </div>
-                  {reservation ? (
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-400">
-                        Sale {format(reservation.endDate, "dd/MM", { locale: es })}
+
+          {/* Ocupación */}
+          <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm p-4 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-400 to-purple-500 rounded-t-xl" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-violet-50 p-2 rounded-lg">
+                <Home className="w-4 h-4 text-violet-600" />
+              </div>
+              <span className="text-xs font-medium text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">
+                Ahora
+              </span>
+            </div>
+            <p className="text-2xl font-extrabold text-gray-900 tracking-tight">
+              {occupancyPercent}%
+            </p>
+            <p className="text-xs text-gray-500 mt-1 font-medium">
+              {metrics.occupiedToday.length}/{cabins.length}
+            </p>
+            <div className="mt-2 bg-gray-100 rounded-full h-1">
+              <div
+                className="bg-gradient-to-r from-violet-400 to-purple-500 h-1 rounded-full transition-all"
+                style={{ width: `${occupancyPercent}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Llegadas */}
+          <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm p-4 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-t-xl" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="bg-amber-50 p-2 rounded-lg">
+                <Clock className="w-4 h-4 text-amber-600" />
+              </div>
+              <span className="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                7 días
+              </span>
+            </div>
+            <p className="text-2xl font-extrabold text-gray-900 tracking-tight">
+              {metrics.upcomingArrivals.length}
+            </p>
+            <p className="text-xs text-gray-500 mt-1 font-medium">Próximas</p>
+          </div>
+
+          {/* Alertas colapsadas */}
+          <div className="space-y-3 pt-2">
+            {/* Cabañas ocupadas hoy */}
+            {metrics.occupiedToday.length > 0 && (
+              <div className="bg-white rounded-xl border border-orange-100 shadow-sm p-4">
+                <h4 className="text-xs font-semibold text-orange-900 mb-3 flex items-center gap-2">
+                  <Home className="w-4 h-4" />
+                  Ocupadas hoy
+                </h4>
+                <div className="space-y-2">
+                  {metrics.occupiedToday.map((cabin) => (
+                    <div key={cabin.id} className="flex items-center justify-between text-xs">
+                      <span className="text-gray-700 font-medium truncate">
+                        {cabin.name}
                       </span>
-                      <span className="text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">
-                        Ocupada
-                      </span>
+                      <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 text-xs">
+                        En uso
+                      </Badge>
                     </div>
-                  ) : (
-                    <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                      Disponible
-                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Check-outs cercanos */}
+            {metrics.checkoutsNearby.length > 0 && (
+              <div className="bg-white rounded-xl border border-amber-100 shadow-sm p-4">
+                <h4 className="text-xs font-semibold text-amber-900 mb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Check-outs
+                </h4>
+                <div className="space-y-2">
+                  {metrics.checkoutsNearby.map((r) => (
+                    <div key={r.id} className="text-xs">
+                      <p className="font-medium text-amber-900">{r.guest.name}</p>
+                      <p className="text-amber-700 text-xs">
+                        {isToday(r.endDate) ? "Sale hoy" : "Sale mañana"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pagos pendientes */}
+            {metrics.pendingPayment.length > 0 && (
+              <div className="bg-white rounded-xl border border-orange-100 shadow-sm p-4">
+                <h4 className="text-xs font-semibold text-orange-900 mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  Pagos pendientes
+                </h4>
+                <div className="space-y-2">
+                  {metrics.pendingPayment.slice(0, 3).map((r) => (
+                    <div
+                      key={r.id}
+                      className="flex items-center justify-between text-xs"
+                    >
+                      <div>
+                        <p className="font-medium text-orange-900">
+                          {r.guest.name}
+                        </p>
+                        <p className="text-orange-700">
+                          ${r.totalPrice.toLocaleString()}
+                        </p>
+                      </div>
+                      <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 text-xs">
+                        Pendiente
+                      </Badge>
+                    </div>
+                  ))}
+                  {metrics.pendingPayment.length > 3 && (
+                    <p className="text-xs text-gray-500 text-center pt-1 border-t border-orange-100">
+                      +{metrics.pendingPayment.length - 3} más
+                    </p>
                   )}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Próximas llegadas */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
-            <div className="bg-gray-100 p-2 rounded-lg">
-              <Users className="w-4 h-4 text-gray-600" />
-            </div>
-            <h3 className="font-semibold text-gray-900">Próximas llegadas (7 días)</h3>
-          </div>
-          {metrics.upcomingArrivals.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-              <div className="bg-gray-100 p-4 rounded-full mb-3">
-                <CalendarDays className="w-6 h-6 text-gray-400" />
               </div>
-              <p className="text-gray-500 text-sm font-medium">Sin check-ins próximos</p>
-              <p className="text-gray-400 text-xs mt-1">No hay llegadas en los próximos 7 días</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {metrics.upcomingArrivals.map((r) => {
-                const daysUntil = differenceInDays(r.startDate, today);
-                const initials = r.guest.name
-                  .split(" ")
-                  .slice(0, 2)
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase();
-                return (
-                  <div
-                    key={r.id}
-                    className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/60 transition-colors"
-                  >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-sky-500 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">{initials}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-800 text-sm truncate">{r.guest.name}</p>
-                      <p className="text-xs text-gray-400 truncate">{r.cabin.name}</p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-semibold text-gray-700">
-                        {format(r.startDate, "dd/MM", { locale: es })}
-                      </p>
-                      <p
-                        className={`text-xs font-medium mt-0.5 ${
-                          daysUntil === 0
-                            ? "text-emerald-600"
-                            : daysUntil === 1
-                              ? "text-amber-600"
-                              : "text-gray-400"
-                        }`}
-                      >
-                        {daysUntil === 0
-                          ? "Hoy"
-                          : daysUntil === 1
-                            ? "Mañana"
-                            : `En ${daysUntil} días`}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Check-outs cercanos */}
-        {metrics.checkoutsNearby.length > 0 && (
-          <div className="bg-white rounded-2xl border border-amber-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-amber-100 flex items-center gap-3 bg-amber-50/50">
-              <div className="bg-amber-100 p-2 rounded-lg">
-                <CheckCircle2 className="w-4 h-4 text-amber-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900">Check-outs hoy y mañana</h3>
-            </div>
-            <div className="divide-y divide-gray-50">
-              {metrics.checkoutsNearby.map((r) => {
-                const initials = r.guest.name
-                  .split(" ")
-                  .slice(0, 2)
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase();
-                return (
-                  <div
-                    key={r.id}
-                    className="flex items-center gap-4 px-6 py-4 hover:bg-amber-50/30 transition-colors"
-                  >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">{initials}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-800 text-sm truncate">{r.guest.name}</p>
-                      <p className="text-xs text-gray-400 truncate">{r.cabin.name}</p>
-                    </div>
-                    <span className="text-xs font-semibold text-amber-700 bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-full flex-shrink-0">
-                      {isToday(r.endDate) ? "Sale hoy" : "Sale mañana"}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+            )}
           </div>
-        )}
-
-        {/* Pagos pendientes */}
-        {metrics.pendingPayment.length > 0 && (
-          <div className="bg-white rounded-2xl border border-orange-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-orange-100 flex items-center gap-3 bg-orange-50/50">
-              <div className="bg-orange-100 p-2 rounded-lg">
-                <AlertCircle className="w-4 h-4 text-orange-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900">Pagos pendientes</h3>
-            </div>
-            <div className="divide-y divide-gray-50">
-              {metrics.pendingPayment.map((r) => {
-                const initials = r.guest.name
-                  .split(" ")
-                  .slice(0, 2)
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase();
-                return (
-                  <div
-                    key={r.id}
-                    className="flex items-center gap-4 px-6 py-4 hover:bg-orange-50/30 transition-colors"
-                  >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-red-400 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-xs font-bold">{initials}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-800 text-sm truncate">{r.guest.name}</p>
-                      <p className="text-xs text-gray-400 truncate">{r.cabin.name} · {format(r.startDate, "dd/MM", { locale: es })}</p>
-                    </div>
-                    <span className="text-sm font-extrabold text-orange-600 flex-shrink-0">
-                      ${r.totalPrice.toLocaleString()}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        </aside>
       </div>
     </div>
   );
