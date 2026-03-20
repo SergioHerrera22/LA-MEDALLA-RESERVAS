@@ -1,10 +1,6 @@
 import { Cabin } from "../types/cabin";
-
-const cabinOneImage = new URL(
-  "../dist/cabanas-la-medalla-2.jpg",
-  import.meta.url,
-).href;
-const cabinTwoImage = new URL("../dist/Captura.PNG", import.meta.url).href;
+import cabinOneImage from "../../assets/cabanas-la-medalla-2.jpg";
+import cabinTwoImage from "../../assets/cabanas-la-medalla-1.png";
 
 export const cabins: Cabin[] = [
   {
