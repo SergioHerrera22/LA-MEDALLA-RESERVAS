@@ -38,6 +38,7 @@ import {
   Home,
   Calendar as CalendarIcon,
   DollarSign,
+  LogOut,
   TrendingUp,
   LayoutDashboard,
 } from "lucide-react";
@@ -45,7 +46,11 @@ import { toast, Toaster } from "sonner";
 import { DateRange } from "react-day-picker";
 import { differenceInDays } from "date-fns";
 
-export default function App() {
+interface AppProps {
+  onSignOut?: () => void;
+}
+
+export default function App({ onSignOut }: AppProps) {
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "reservations" | "expenses" | "balance" | "inventory"
   >("dashboard");
@@ -375,21 +380,33 @@ export default function App() {
                 </p>
               </div>
             </div>
-            <Button
-              variant="secondary"
-              className="gap-2 bg-white/15 hover:bg-white/25 text-white border border-white/25 backdrop-blur-sm rounded-xl font-medium transition-all"
-              onClick={() => {
-                setActiveTab("reservations");
-                setTimeout(() => {
-                  document
-                    .getElementById("reservations-list")
-                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }, 100);
-              }}
-            >
-              <CalendarIcon className="w-4 h-4" />
-              Ver Reservas
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                className="gap-2 bg-white/15 hover:bg-white/25 text-white border border-white/25 backdrop-blur-sm rounded-xl font-medium transition-all"
+                onClick={() => {
+                  setActiveTab("reservations");
+                  setTimeout(() => {
+                    document
+                      .getElementById("reservations-list")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 100);
+                }}
+              >
+                <CalendarIcon className="w-4 h-4" />
+                Ver Reservas
+              </Button>
+              {onSignOut && (
+                <Button
+                  variant="secondary"
+                  className="gap-2 bg-white/10 hover:bg-red-500/80 text-white border border-white/20 backdrop-blur-sm rounded-xl font-medium transition-all"
+                  onClick={onSignOut}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Salir</span>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>

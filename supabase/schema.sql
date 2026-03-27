@@ -94,26 +94,26 @@ drop policy if exists "open_access_cabins" on public.cabins;
 create policy "open_access_cabins"
 on public.cabins
 for all
-using (true)
-with check (true);
+using (auth.uid() is not null)
+with check (auth.uid() is not null);
 
 drop policy if exists "open_access_reservations" on public.reservations;
 create policy "open_access_reservations"
 on public.reservations
 for all
-using (true)
-with check (true);
+using (auth.uid() is not null)
+with check (auth.uid() is not null);
 
 drop policy if exists "open_access_expenses" on public.expenses;
 create policy "open_access_expenses"
 on public.expenses
 for all
-using (true)
-with check (true);
+using (auth.uid() is not null)
+with check (auth.uid() is not null);
 
 drop policy if exists "open_access_inventory_items" on public.inventory_items;
 create policy "open_access_inventory_items"
 on public.inventory_items
 for all
-using (true)
-with check (true);
+using (auth.uid() is not null)
+with check (auth.uid() is not null);
