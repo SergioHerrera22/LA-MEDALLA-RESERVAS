@@ -54,14 +54,41 @@ create table if not exists public.expenses (
   created_at timestamptz not null default timezone('utc', now())
 );
 
+create table if not exists public.inventory_items (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  category text not null,
+  quantity integer not null default 0 check (quantity >= 0),
+  replacement_cost numeric(12, 2) not null check (replacement_cost >= 0),
+  location_type text not null check (location_type in ('cabin', 'deposit')),
+  cabin_id text references public.cabins(id) on update cascade on delete set null,
+  notes text,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
+  constraint inventory_items_location_check check (
+    (location_type = 'deposit' and cabin_id is null)
+    or
+    (location_type = 'cabin' and cabin_id is not null)
+  )
+);
+
+drop trigger if exists inventory_items_set_updated_at on public.inventory_items;
+create trigger inventory_items_set_updated_at
+before update on public.inventory_items
+for each row
+execute function public.set_updated_at();
+
 create index if not exists reservations_cabin_id_idx on public.reservations (cabin_id);
 create index if not exists reservations_start_date_idx on public.reservations (start_date);
 create index if not exists expenses_cabin_id_idx on public.expenses (cabin_id);
 create index if not exists expenses_date_idx on public.expenses (date);
+create index if not exists inventory_items_location_type_idx on public.inventory_items (location_type);
+create index if not exists inventory_items_cabin_id_idx on public.inventory_items (cabin_id);
 
 alter table public.cabins enable row level security;
 alter table public.reservations enable row level security;
 alter table public.expenses enable row level security;
+alter table public.inventory_items enable row level security;
 
 drop policy if exists "open_access_cabins" on public.cabins;
 create policy "open_access_cabins"
@@ -80,6 +107,13 @@ with check (true);
 drop policy if exists "open_access_expenses" on public.expenses;
 create policy "open_access_expenses"
 on public.expenses
+for all
+using (true)
+with check (true);
+
+drop policy if exists "open_access_inventory_items" on public.inventory_items;
+create policy "open_access_inventory_items"
+on public.inventory_items
 for all
 using (true)
 with check (true);

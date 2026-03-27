@@ -9,19 +9,30 @@ import { ReservationsList } from "./components/ReservationsList";
 import { Dashboard } from "./components/Dashboard";
 import { ExpensesManager } from "./components/ExpensesManager";
 import { BalanceView } from "./components/BalanceView";
+import { InventoryManager } from "./components/InventoryManager";
 import { cabins as initialCabins } from "./data/cabins";
 import {
+  createInventoryItem,
   createExpense,
   createReservation,
+  deleteInventoryItem,
   deleteExpense,
   deleteReservation,
   loadAppData,
+  updateInventoryItem,
   updateExpense,
   updateCabinPrice,
   updateReservation,
 } from "./lib/persistence";
-import { Cabin, GuestData, Reservation, Expense } from "./types/cabin";
 import {
+  Cabin,
+  GuestData,
+  Reservation,
+  Expense,
+  InventoryItem,
+} from "./types/cabin";
+import {
+  Boxes,
   ChevronLeft,
   ChevronRight,
   Home,
@@ -36,7 +47,7 @@ import { differenceInDays } from "date-fns";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "reservations" | "expenses" | "balance"
+    "dashboard" | "reservations" | "expenses" | "balance" | "inventory"
   >("dashboard");
   const [currentStep, setCurrentStep] = useState(1);
   const [cabinList, setCabinList] = useState<Cabin[]>(initialCabins);
@@ -45,6 +56,7 @@ export default function App() {
   const [guestData, setGuestData] = useState<GuestData | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isSavingReservation, setIsSavingReservation] = useState(false);
@@ -65,6 +77,7 @@ export default function App() {
         setCabinList(data.cabins);
         setReservations(data.reservations);
         setExpenses(data.expenses);
+        setInventoryItems(data.inventoryItems);
       } catch (error) {
         console.error(error);
 
@@ -266,6 +279,47 @@ export default function App() {
     }
   };
 
+  const handleAddInventoryItem = async (
+    item: Omit<InventoryItem, "id" | "updatedAt">,
+  ) => {
+    try {
+      const createdItem = await createInventoryItem(item);
+      setInventoryItems((currentItems) => [createdItem, ...currentItems]);
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo guardar el articulo en Supabase");
+      throw error;
+    }
+  };
+
+  const handleUpdateInventoryItem = async (updatedItem: InventoryItem) => {
+    try {
+      const savedItem = await updateInventoryItem(updatedItem);
+      setInventoryItems((currentItems) =>
+        currentItems.map((item) =>
+          item.id === savedItem.id ? savedItem : item,
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo actualizar el articulo en Supabase");
+      throw error;
+    }
+  };
+
+  const handleDeleteInventoryItem = async (itemId: string) => {
+    try {
+      await deleteInventoryItem(itemId);
+      setInventoryItems((currentItems) =>
+        currentItems.filter((item) => item.id !== itemId),
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("No se pudo eliminar el articulo en Supabase");
+      throw error;
+    }
+  };
+
   const canGoNext = () => {
     if (currentStep === 1) return selectedCabin !== null;
     if (currentStep === 2)
@@ -355,7 +409,7 @@ export default function App() {
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as typeof activeTab)}
           >
-            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 mb-8 bg-white border border-gray-200 shadow-sm rounded-2xl p-1 h-auto">
+            <TabsList className="grid w-full max-w-4xl mx-auto grid-cols-5 mb-8 bg-white border border-gray-200 shadow-sm rounded-2xl p-1 h-auto">
               <TabsTrigger
                 value="dashboard"
                 className="gap-2 rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
@@ -383,6 +437,13 @@ export default function App() {
               >
                 <TrendingUp className="w-4 h-4" />
                 Balance
+              </TabsTrigger>
+              <TabsTrigger
+                value="inventory"
+                className="gap-2 rounded-xl py-2.5 text-sm font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+              >
+                <Boxes className="w-4 h-4" />
+                Inventario
               </TabsTrigger>
             </TabsList>
 
@@ -622,7 +683,6 @@ export default function App() {
                     onDelete={handleDeleteReservation}
                   />
                 </div>
-
               </div>
             </TabsContent>
 
@@ -646,6 +706,18 @@ export default function App() {
                   reservations={reservations}
                   expenses={expenses}
                   cabins={cabinList}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="inventory">
+              <div className="max-w-6xl mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <InventoryManager
+                  cabins={cabinList}
+                  inventoryItems={inventoryItems}
+                  onAddItem={handleAddInventoryItem}
+                  onUpdateItem={handleUpdateInventoryItem}
+                  onDeleteItem={handleDeleteInventoryItem}
                 />
               </div>
             </TabsContent>

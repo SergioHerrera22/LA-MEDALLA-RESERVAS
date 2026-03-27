@@ -22,17 +22,31 @@ export interface Reservation {
   endDate: Date;
   guest: GuestData;
   totalPrice: number;
-  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
-  paymentStatus: 'paid' | 'pending' | 'partial';
+  status: "confirmed" | "pending" | "cancelled" | "completed";
+  paymentStatus: "paid" | "pending" | "partial";
 }
 
 export interface Expense {
   id: string;
   date: Date;
-  category: 'maintenance' | 'cleaning' | 'utilities' | 'supplies' | 'other';
+  category: "maintenance" | "cleaning" | "utilities" | "supplies" | "other";
   description: string;
   amount: number;
   cabin?: Cabin;
+}
+
+export type InventoryLocationType = "cabin" | "deposit";
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  replacementCost: number;
+  locationType: InventoryLocationType;
+  cabin?: Cabin;
+  notes?: string;
+  updatedAt: Date;
 }
 
 export interface BalanceSummary {

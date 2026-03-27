@@ -1,6 +1,12 @@
 import { format, parseISO } from "date-fns";
 import { cabins as initialCabins } from "../data/cabins";
-import { Cabin, Expense, Reservation } from "../types/cabin";
+import {
+  Cabin,
+  Expense,
+  InventoryItem,
+  InventoryLocationType,
+  Reservation,
+} from "../types/cabin";
 import { getSupabaseClient } from "./supabase";
 
 type CabinRow = {
@@ -34,6 +40,18 @@ type ExpenseRow = {
   description: string;
   amount: number;
   cabin_id: string | null;
+};
+
+type InventoryItemRow = {
+  id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  replacement_cost: number;
+  location_type: InventoryLocationType;
+  cabin_id: string | null;
+  notes: string | null;
+  updated_at: string;
 };
 
 const initialCabinImageById = new Map(
@@ -113,6 +131,21 @@ const mapExpenseRow = (
   cabin: row.cabin_id ? cabinById.get(row.cabin_id) : undefined,
 });
 
+const mapInventoryRow = (
+  row: InventoryItemRow,
+  cabinById: Map<string, Cabin>,
+): InventoryItem => ({
+  id: row.id,
+  name: row.name,
+  category: row.category,
+  quantity: Number(row.quantity),
+  replacementCost: Number(row.replacement_cost),
+  locationType: row.location_type,
+  cabin: row.cabin_id ? cabinById.get(row.cabin_id) : undefined,
+  notes: row.notes ?? "",
+  updatedAt: parseISO(row.updated_at),
+});
+
 const ensureCabinsSeeded = async () => {
   const supabase = getSupabaseClient();
 
@@ -142,13 +175,18 @@ export const loadAppData = async () => {
 
   await ensureCabinsSeeded();
 
-  const [cabinsResult, reservationsResult, expensesResult] = await Promise.all([
-    supabase.from("cabins").select("*").order("id"),
-    supabase.from("reservations").select("*").order("start_date", {
-      ascending: false,
-    }),
-    supabase.from("expenses").select("*").order("date", { ascending: false }),
-  ]);
+  const [cabinsResult, reservationsResult, expensesResult, inventoryResult] =
+    await Promise.all([
+      supabase.from("cabins").select("*").order("id"),
+      supabase.from("reservations").select("*").order("start_date", {
+        ascending: false,
+      }),
+      supabase.from("expenses").select("*").order("date", { ascending: false }),
+      supabase
+        .from("inventory_items")
+        .select("*")
+        .order("updated_at", { ascending: false }),
+    ]);
 
   if (cabinsResult.error) {
     throw cabinsResult.error;
@@ -160,6 +198,10 @@ export const loadAppData = async () => {
 
   if (expensesResult.error) {
     throw expensesResult.error;
+  }
+
+  if (inventoryResult.error) {
+    throw inventoryResult.error;
   }
 
   const cabins = (cabinsResult.data ?? []).map((row) =>
@@ -175,7 +217,11 @@ export const loadAppData = async () => {
     mapExpenseRow(row as ExpenseRow, cabinById),
   );
 
-  return { cabins, reservations, expenses };
+  const inventoryItems = (inventoryResult.data ?? []).map((row) =>
+    mapInventoryRow(row as InventoryItemRow, cabinById),
+  );
+
+  return { cabins, reservations, expenses, inventoryItems };
 };
 
 export const updateCabinPrice = async (cabinId: string, newPrice: number) => {
@@ -331,4 +377,87 @@ export const updateExpense = async (expense: Expense): Promise<Expense> => {
   }
 
   return expense;
+};
+
+export const createInventoryItem = async (
+  item: Omit<InventoryItem, "id" | "updatedAt">,
+): Promise<InventoryItem> => {
+  const supabase = getSupabaseClient();
+
+  const payload = {
+    name: item.name,
+    category: item.category,
+    quantity: item.quantity,
+    replacement_cost: item.replacementCost,
+    location_type: item.locationType,
+    cabin_id: item.locationType === "cabin" ? (item.cabin?.id ?? null) : null,
+    notes: item.notes?.trim() ? item.notes.trim() : null,
+  };
+
+  const { data, error } = await supabase
+    .from("inventory_items")
+    .insert(payload)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    category: data.category,
+    quantity: Number(data.quantity),
+    replacementCost: Number(data.replacement_cost),
+    locationType: data.location_type,
+    cabin: item.locationType === "cabin" ? item.cabin : undefined,
+    notes: data.notes ?? "",
+    updatedAt: parseISO(data.updated_at),
+  };
+};
+
+export const updateInventoryItem = async (
+  item: InventoryItem,
+): Promise<InventoryItem> => {
+  const supabase = getSupabaseClient();
+
+  const payload = {
+    name: item.name,
+    category: item.category,
+    quantity: item.quantity,
+    replacement_cost: item.replacementCost,
+    location_type: item.locationType,
+    cabin_id: item.locationType === "cabin" ? (item.cabin?.id ?? null) : null,
+    notes: item.notes?.trim() ? item.notes.trim() : null,
+  };
+
+  const { data, error } = await supabase
+    .from("inventory_items")
+    .update(payload)
+    .eq("id", item.id)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    ...item,
+    updatedAt: parseISO(data.updated_at),
+  };
+};
+
+export const deleteInventoryItem = async (itemId: string) => {
+  const supabase = getSupabaseClient();
+
+  const { error } = await supabase
+    .from("inventory_items")
+    .delete()
+    .eq("id", itemId);
+
+  if (error) {
+    throw error;
+  }
 };
